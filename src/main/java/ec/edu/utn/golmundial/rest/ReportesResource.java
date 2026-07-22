@@ -37,7 +37,7 @@ public class ReportesResource {
             reporte.setUsuariosRegistrados(0L);
             reporte.setPartidosFinalizados(0L);
 
-            List<?> circulacionList = em.createNativeQuery("SELECT * FROM vista_circulacion_monedas LIMIT 1").getResultList();
+            List<?> circulacionList = em.createNativeQuery("SELECT total_utngolcoin_circulante FROM vista_circulacion_monedas LIMIT 1").getResultList();
             if (!circulacionList.isEmpty() && circulacionList.get(0) != null) {
                 reporte.setUtnGolCoinEnCirculacion(new BigDecimal(circulacionList.get(0).toString()));
             }
@@ -45,9 +45,11 @@ public class ReportesResource {
             List<?> partidoInfoList = em.createNativeQuery("SELECT * FROM vista_partidos_mas_predicciones LIMIT 1").getResultList();
             if (!partidoInfoList.isEmpty() && partidoInfoList.get(0) != null) {
                 Object[] partidoInfo = (Object[]) partidoInfoList.get(0);
-                if (partidoInfo.length >= 2) {
-                    reporte.setPartidoMasPredicciones(partidoInfo[0] != null ? partidoInfo[0].toString() : "");
-                    reporte.setTotalPredicciones(partidoInfo[1] != null ? Long.valueOf(partidoInfo[1].toString()) : 0L);
+                if (partidoInfo.length >= 5) {
+                    String local = partidoInfo[1] != null ? partidoInfo[1].toString() : "";
+                    String visitante = partidoInfo[2] != null ? partidoInfo[2].toString() : "";
+                    reporte.setPartidoMasPredicciones(local + " vs " + visitante);
+                    reporte.setTotalPredicciones(partidoInfo[4] != null ? Long.valueOf(partidoInfo[4].toString()) : 0L);
                 }
             }
             
@@ -63,7 +65,6 @@ public class ReportesResource {
             
             return Response.ok(reporte).build();
         } catch (Exception e) {
-            // Loguear el error internamente y no exponer detalles al cliente
             LOGGER.log(Level.SEVERE, "Error al procesar el resumen", e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
                            .entity("{\"error\":\"Ocurrio un error interno en el servidor\"}")

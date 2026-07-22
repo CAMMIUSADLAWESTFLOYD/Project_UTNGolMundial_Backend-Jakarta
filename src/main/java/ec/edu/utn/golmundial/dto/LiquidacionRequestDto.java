@@ -6,7 +6,9 @@ import java.io.Serializable;
 public class LiquidacionRequestDto implements Serializable {
 
     private Long partidoId;
-    private String resultadoFinal;
+    private Integer golesLocal;
+    private Integer golesVisitante;
+    private String resultado;
 
     public LiquidacionRequestDto() {
     }
@@ -19,11 +21,27 @@ public class LiquidacionRequestDto implements Serializable {
         this.partidoId = partidoId;
     }
 
-    public String getResultadoFinal() {
-        return resultadoFinal;
+    public Integer getGolesLocal() {
+        return golesLocal;
     }
 
-    public void setResultadoFinal(String resultadoFinal) {
-        this.resultadoFinal = resultadoFinal;
+    public void setGolesLocal(Integer golesLocal) {
+        this.golesLocal = golesLocal;
+    }
+
+    public Integer getGolesVisitante() {
+        return golesVisitante;
+    }
+
+    public void setGolesVisitante(Integer golesVisitante) {
+        this.golesVisitante = golesVisitante;
+    }
+
+    public String getResultado() {
+        return resultado;
+    }
+
+    public void setResultado(String resultado) {
+        this.resultado = resultado;
     }
 }

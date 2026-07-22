@@ -17,6 +17,8 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
@@ -27,6 +29,8 @@ import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 @Consumes(MediaType.APPLICATION_JSON)
 @Tag(name = "Billeteras", description = "Endpoints para consultar saldos y transacciones")
 public class BilleteraResource {
+
+    private static final Logger LOGGER = Logger.getLogger(BilleteraResource.class.getName());
 
     @Inject
     private BilleteraDao billeteraDao;
@@ -44,24 +48,31 @@ public class BilleteraResource {
     @APIResponse(responseCode = "200", description = "Billetera encontrada")
     @APIResponse(responseCode = "404", description = "Billetera no encontrada")
     public Response consultarPorUsuario(@PathParam("usuarioId") Long usuarioId) {
-        Billetera billetera = billeteraDao.buscarPorUsuarioId(usuarioId);
-        if (billetera == null) {
-            return Response.status(Response.Status.NOT_FOUND)
-                    .entity(new MensajeResponseDto("Billetera no encontrada para el usuario", false))
+        try {
+            Billetera billetera = billeteraDao.buscarPorUsuarioId(usuarioId);
+            if (billetera == null) {
+                return Response.status(Response.Status.NOT_FOUND)
+                        .entity(new MensajeResponseDto("Billetera no encontrada para el usuario", false))
+                        .build();
+            }
+
+            Usuario usuario = usuarioDao.buscarPorId(usuarioId);
+            String username = (usuario != null) ? usuario.getUsername() : "";
+
+            BilleteraResponseDto dto = new BilleteraResponseDto(
+                    billetera.getId(),
+                    billetera.getUsuarioId(),
+                    username,
+                    billetera.getSaldo()
+            );
+
+            return Response.ok(dto).build();
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Error al consultar billetera por usuario", e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity(new MensajeResponseDto("Error interno al consultar billetera", false))
                     .build();
         }
-
-        Usuario usuario = usuarioDao.buscarPorId(usuarioId);
-        String username = (usuario != null) ? usuario.getUsername() : "";
-
-        BilleteraResponseDto dto = new BilleteraResponseDto(
-                billetera.getId(),
-                billetera.getUsuarioId(),
-                username,
-                billetera.getSaldo()
-        );
-
-        return Response.ok(dto).build();
     }
 
     // Consultar las transacciones registradas de una billetera
@@ -69,7 +80,20 @@ public class BilleteraResource {
     @Path("/{billeteraId}/transacciones")
     @Operation(summary = "Listar transacciones de billetera", description = "Obtiene el historial de transacciones de una billetera")
     public Response listarTransacciones(@PathParam("billeteraId") Long billeteraId) {
-        List<Transaccion> transacciones = transaccionDao.listarPorBilletera(billeteraId);
-        return Response.ok(transacciones).build();
+        try {
+            Billetera billetera = billeteraDao.buscarPorId(billeteraId);
+            if (billetera == null) {
+                return Response.status(Response.Status.NOT_FOUND)
+                        .entity(new MensajeResponseDto("Billetera no encontrada", false))
+                        .build();
+            }
+            List<Transaccion> transacciones = transaccionDao.listarPorBilletera(billeteraId);
+            return Response.ok(transacciones).build();
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Error al listar transacciones", e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity(new MensajeResponseDto("Error interno al listar transacciones", false))
+                    .build();
+        }
     }
 }
