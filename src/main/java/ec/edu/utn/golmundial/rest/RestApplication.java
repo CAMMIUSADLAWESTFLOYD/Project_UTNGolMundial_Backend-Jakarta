@@ -14,7 +14,7 @@ import org.eclipse.microprofile.openapi.annotations.servers.Server;
         description = "API REST para la gestion de la moneda virtual UTNGolCoin y predicciones del Mundial"
     ),
     servers = {
-        @Server(url = "/Project_UTNGolMundial_Backend-Jakarta", description = "Servidor WildFly Local")
+        @Server(url = "/UTNGolCoin", description = "Servidor WildFly Local")
     }
 )
 @ApplicationPath("/api")

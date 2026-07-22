@@ -16,7 +16,10 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/5.11.8/swagger-ui-standalone-preset.min.js"></script>
     <script>
         window.onload = function() {
-            var openapiSpecUrl = window.location.origin + "/Project_UTNGolMundial_Backend-Jakarta/openapi";
+            var path = window.location.pathname;
+            var contextPath = path.substring(0, path.indexOf('/swagger-ui'));
+            var openapiSpecUrl = window.location.origin + contextPath + "/openapi";
+
             window.ui = SwaggerUIBundle({
                 url: openapiSpecUrl,
                 dom_id: '#swagger-ui',
