@@ -9,10 +9,15 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import java.math.BigDecimal;
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 // Recurso REST para la generacion de reportes
 @Path("/reportes")
 public class ReportesResource {
+
+    private static final Logger LOGGER = Logger.getLogger(ReportesResource.class.getName());
 
     @PersistenceContext(unitName = "UTNGolCoinPU")
     private EntityManager em;
@@ -25,30 +30,44 @@ public class ReportesResource {
         ReporteResumenDto reporte = new ReporteResumenDto();
         
         try {
-            Object circulacionObj = em.createNativeQuery("SELECT * FROM vista_circulacion_monedas LIMIT 1").getSingleResult();
-            if (circulacionObj != null) {
-                reporte.setUtnGolCoinEnCirculacion(new BigDecimal(circulacionObj.toString()));
+            // Inicializar valores por defecto
+            reporte.setUtnGolCoinEnCirculacion(BigDecimal.ZERO);
+            reporte.setPartidoMasPredicciones("");
+            reporte.setTotalPredicciones(0L);
+            reporte.setUsuariosRegistrados(0L);
+            reporte.setPartidosFinalizados(0L);
+
+            List<?> circulacionList = em.createNativeQuery("SELECT * FROM vista_circulacion_monedas LIMIT 1").getResultList();
+            if (!circulacionList.isEmpty() && circulacionList.get(0) != null) {
+                reporte.setUtnGolCoinEnCirculacion(new BigDecimal(circulacionList.get(0).toString()));
             }
             
-            Object[] partidoInfo = (Object[]) em.createNativeQuery("SELECT * FROM vista_partidos_mas_predicciones LIMIT 1").getSingleResult();
-            if (partidoInfo != null && partidoInfo.length >= 2) {
-                reporte.setPartidoMasPredicciones(partidoInfo[0] != null ? partidoInfo[0].toString() : "");
-                reporte.setTotalPredicciones(partidoInfo[1] != null ? Long.valueOf(partidoInfo[1].toString()) : 0L);
+            List<?> partidoInfoList = em.createNativeQuery("SELECT * FROM vista_partidos_mas_predicciones LIMIT 1").getResultList();
+            if (!partidoInfoList.isEmpty() && partidoInfoList.get(0) != null) {
+                Object[] partidoInfo = (Object[]) partidoInfoList.get(0);
+                if (partidoInfo.length >= 2) {
+                    reporte.setPartidoMasPredicciones(partidoInfo[0] != null ? partidoInfo[0].toString() : "");
+                    reporte.setTotalPredicciones(partidoInfo[1] != null ? Long.valueOf(partidoInfo[1].toString()) : 0L);
+                }
             }
             
-            Object usuariosObj = em.createNativeQuery("SELECT COUNT(*) FROM usuarios").getSingleResult();
-            if (usuariosObj != null) {
-                reporte.setUsuariosRegistrados(Long.valueOf(usuariosObj.toString()));
+            List<?> usuariosList = em.createNativeQuery("SELECT COUNT(*) FROM usuarios").getResultList();
+            if (!usuariosList.isEmpty() && usuariosList.get(0) != null) {
+                reporte.setUsuariosRegistrados(Long.valueOf(usuariosList.get(0).toString()));
             }
             
-            Object partidosObj = em.createNativeQuery("SELECT COUNT(*) FROM partidos WHERE estado = 'FINALIZADO'").getSingleResult();
-            if (partidosObj != null) {
-                reporte.setPartidosFinalizados(Long.valueOf(partidosObj.toString()));
+            List<?> partidosList = em.createNativeQuery("SELECT COUNT(*) FROM partidos WHERE estado = 'FINALIZADO'").getResultList();
+            if (!partidosList.isEmpty() && partidosList.get(0) != null) {
+                reporte.setPartidosFinalizados(Long.valueOf(partidosList.get(0).toString()));
             }
             
             return Response.ok(reporte).build();
         } catch (Exception e) {
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
+            // Loguear el error internamente y no exponer detalles al cliente
+            LOGGER.log(Level.SEVERE, "Error al procesar el resumen", e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                           .entity("{\"error\":\"Ocurrio un error interno en el servidor\"}")
+                           .build();
         }
     }
 }

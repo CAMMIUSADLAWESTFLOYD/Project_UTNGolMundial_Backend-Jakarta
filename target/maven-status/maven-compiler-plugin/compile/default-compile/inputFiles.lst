@@ -1,6 +1,9 @@
+/home/kdpenap/Project_UTNGolMundial_Backend-Jakarta/src/main/java/ec/edu/utn/golmundial/rest/ReportesResource.java
 /home/kdpenap/Project_UTNGolMundial_Backend-Jakarta/src/main/java/ec/edu/utn/golmundial/dto/BonoDiarioRequestDto.java
 /home/kdpenap/Project_UTNGolMundial_Backend-Jakarta/src/main/java/ec/edu/utn/golmundial/modelos/Transaccion.java
 /home/kdpenap/Project_UTNGolMundial_Backend-Jakarta/src/main/java/ec/edu/utn/golmundial/dto/UsuarioBilleteraRequestDto.java
+/home/kdpenap/Project_UTNGolMundial_Backend-Jakarta/src/main/java/ec/edu/utn/golmundial/dto/UsuarioRegistroDto.java
+/home/kdpenap/Project_UTNGolMundial_Backend-Jakarta/src/main/java/ec/edu/utn/golmundial/dto/ReporteResumenDto.java
 /home/kdpenap/Project_UTNGolMundial_Backend-Jakarta/src/main/java/ec/edu/utn/golmundial/modelos/Billetera.java
 /home/kdpenap/Project_UTNGolMundial_Backend-Jakarta/src/main/java/ec/edu/utn/golmundial/dto/PrediccionRequestDto.java
 /home/kdpenap/Project_UTNGolMundial_Backend-Jakarta/src/main/java/ec/edu/utn/golmundial/rest/UsuarioResource.java
