@@ -16,6 +16,7 @@ import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -93,6 +94,27 @@ public class BilleteraResource {
             LOGGER.log(Level.SEVERE, "Error al listar transacciones", e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
                     .entity(new MensajeResponseDto("Error interno al listar transacciones", false))
+                    .build();
+        }
+    }
+
+    // Obtener todas las billeteras (para el ranking)
+    @GET
+    @Operation(summary = "Listar todas las billeteras", description = "Retorna todas las billeteras ordenadas por saldo para el ranking")
+    public Response listarTodas() {
+        try {
+            List<Billetera> billeteras = billeteraDao.listarTodas();
+            List<BilleteraResponseDto> ranking = new ArrayList<>();
+            for (Billetera b : billeteras) {
+                Usuario u = usuarioDao.buscarPorId(b.getUsuarioId());
+                String username = (u != null) ? u.getUsername() : "Desconocido";
+                ranking.add(new BilleteraResponseDto(b.getId(), b.getUsuarioId(), username, b.getSaldo()));
+            }
+            return Response.ok(ranking).build();
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Error al listar todas las billeteras", e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity(new MensajeResponseDto("Error interno al obtener billeteras", false))
                     .build();
         }
     }

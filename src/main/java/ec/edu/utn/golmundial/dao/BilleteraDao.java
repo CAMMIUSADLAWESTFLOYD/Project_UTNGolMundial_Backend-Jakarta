@@ -29,4 +29,9 @@ public class BilleteraDao {
         }
         return resultados.get(0);
     }
+
+    // Listar todas las billeteras registradas ordenadas por saldo
+    public List<Billetera> listarTodas() {
+        return em.createQuery("SELECT b FROM Billetera b ORDER BY b.saldo DESC", Billetera.class).getResultList();
+    }
 }
