@@ -17,11 +17,15 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import java.util.List;
+import org.eclipse.microprofile.openapi.annotations.Operation;
+import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
+import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 
 // Recurso REST para consultar saldo de billetera y transacciones
 @Path("/billeteras")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
+@Tag(name = "Billeteras", description = "Endpoints para consultar saldos y transacciones")
 public class BilleteraResource {
 
     @Inject
@@ -36,6 +40,9 @@ public class BilleteraResource {
     // Consultar el saldo de billetera dado el ID del usuario
     @GET
     @Path("/usuario/{usuarioId}")
+    @Operation(summary = "Consultar billetera por usuario", description = "Retorna la billetera y el saldo del usuario")
+    @APIResponse(responseCode = "200", description = "Billetera encontrada")
+    @APIResponse(responseCode = "404", description = "Billetera no encontrada")
     public Response consultarPorUsuario(@PathParam("usuarioId") Long usuarioId) {
         Billetera billetera = billeteraDao.buscarPorUsuarioId(usuarioId);
         if (billetera == null) {
@@ -60,6 +67,7 @@ public class BilleteraResource {
     // Consultar las transacciones registradas de una billetera
     @GET
     @Path("/{billeteraId}/transacciones")
+    @Operation(summary = "Listar transacciones de billetera", description = "Obtiene el historial de transacciones de una billetera")
     public Response listarTransacciones(@PathParam("billeteraId") Long billeteraId) {
         List<Transaccion> transacciones = transaccionDao.listarPorBilletera(billeteraId);
         return Response.ok(transacciones).build();

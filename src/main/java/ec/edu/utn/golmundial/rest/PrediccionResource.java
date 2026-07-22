@@ -15,11 +15,15 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import java.util.List;
+import org.eclipse.microprofile.openapi.annotations.Operation;
+import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
+import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 
 // Recurso REST para gestionar las predicciones de los partidos
 @Path("/predicciones")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
+@Tag(name = "Predicciones", description = "Endpoints para registrar, liquidar y consultar predicciones")
 public class PrediccionResource {
 
     @Inject
@@ -28,6 +32,9 @@ public class PrediccionResource {
     // Endpoint para registrar una nueva prediccion consumiendo el procedimiento almacenado
     @POST
     @Path("/registrar")
+    @Operation(summary = "Registrar prediccion", description = "Registra una nueva prediccion llamando a sp_registrar_prediccion")
+    @APIResponse(responseCode = "200", description = "Prediccion registrada exitosamente")
+    @APIResponse(responseCode = "400", description = "Datos de entrada invalidos")
     public Response registrarPrediccion(PrediccionRequestDto dto) {
         try {
             if (dto == null || dto.getUsuarioId() == null || dto.getPartidoId() == null) {
@@ -54,6 +61,9 @@ public class PrediccionResource {
     // Endpoint para liquidar los premios de un partido finalizado
     @POST
     @Path("/liquidar")
+    @Operation(summary = "Liquidar predicciones de partido", description = "Liquida predicciones llamando a sp_liquidar_predicciones_partido")
+    @APIResponse(responseCode = "200", description = "Liquidacion completada exitosamente")
+    @APIResponse(responseCode = "400", description = "Datos incompletos")
     public Response liquidarPredicciones(LiquidacionRequestDto dto) {
         try {
             if (dto == null || dto.getPartidoId() == null || dto.getResultadoFinal() == null) {
@@ -75,6 +85,7 @@ public class PrediccionResource {
     // Endpoint para consultar las predicciones de un usuario especifico
     @GET
     @Path("/usuario/{usuarioId}")
+    @Operation(summary = "Listar predicciones de usuario", description = "Obtiene la lista de predicciones realizadas por un usuario")
     public Response listarPorUsuario(@PathParam("usuarioId") Long usuarioId) {
         List<Prediccion> lista = prediccionDao.listarPorUsuario(usuarioId);
         return Response.ok(lista).build();
