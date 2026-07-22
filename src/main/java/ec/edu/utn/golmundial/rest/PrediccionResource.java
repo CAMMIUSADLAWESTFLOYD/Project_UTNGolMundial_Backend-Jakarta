@@ -85,13 +85,13 @@ public class PrediccionResource {
     @APIResponse(responseCode = "400", description = "Datos incompletos")
     public Response liquidarPredicciones(LiquidacionRequestDto dto) {
         try {
-            if (dto == null || dto.getPartidoId() == null || dto.getResultado() == null) {
+            if (dto == null || dto.getPartidoId() == null || dto.getResultadoFinal() == null) {
                 return Response.status(Response.Status.BAD_REQUEST)
                         .entity(new MensajeResponseDto("Datos de liquidacion incompletos", false))
                         .build();
             }
 
-            String resultadoDB = dto.getResultado();
+            String resultadoDB = dto.getResultadoFinal();
             if ("Local".equalsIgnoreCase(resultadoDB)) {
                 resultadoDB = "1";
             } else if ("Visitante".equalsIgnoreCase(resultadoDB)) {
