@@ -17,13 +17,13 @@
     </properties>
 
     <dependencies>
-        <dependency>
-            <groupId>jakarta.jakartaee-api</groupId>
-            <artifactId>jakarta.jakartaee-api</artifactId>
-            <version>10.0.0</version>
-            <scope>provided</scope>
-        </dependency>
-    </dependencies>
+    <dependency>
+        <groupId>jakarta.platform</groupId>
+        <artifactId>jakarta.jakartaee-api</artifactId>
+        <version>10.0.0</version>
+        <scope>provided</scope>
+    </dependency>
+</dependencies>
 
     <build>
         <finalName>Project_UTNGolMundial_Backend-Jakarta</finalName>
