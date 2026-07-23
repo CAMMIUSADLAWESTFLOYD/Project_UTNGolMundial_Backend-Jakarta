@@ -1,13 +1,18 @@
 package ec.edu.utn.golmundial.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import java.io.Serializable;
+
 // DTO para el registro de nuevos usuarios
-public class UsuarioRegistroDto {
+@JsonIgnoreProperties(ignoreUnknown = true)
+public class UsuarioRegistroDto implements Serializable {
 
     private Integer id;
     private String username;
     private String nombre;
     private String email;
     private Short rolId;
+    private Boolean activo;
 
     public UsuarioRegistroDto() {
     }
@@ -50,5 +55,13 @@ public class UsuarioRegistroDto {
 
     public void setRolId(Short rolId) {
         this.rolId = rolId;
+    }
+
+    public Boolean getActivo() {
+        return activo;
+    }
+
+    public void setActivo(Boolean activo) {
+        this.activo = activo;
     }
 }
