@@ -9,6 +9,7 @@ import jakarta.persistence.ParameterMode;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.StoredProcedureQuery;
 import jakarta.persistence.TypedQuery;
+import jakarta.transaction.Transactional;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -51,6 +52,7 @@ public class PrediccionDao {
     }
 
     // Liquida las predicciones de un partido comparando con el resultado real
+    @Transactional
     public void liquidarPrediccionesPartido(Long partidoId, String resultadoFinal) {
         TypedQuery<Prediccion> query = em.createQuery("SELECT p FROM Prediccion p WHERE p.partidoId = :partidoId AND p.estado = 'PENDIENTE'", Prediccion.class);
         query.setParameter("partidoId", partidoId);
@@ -69,27 +71,27 @@ public class PrediccionDao {
                 
                 if (!billeteras.isEmpty()) {
                     Billetera b = billeteras.get(0);
-                    b.setSaldo(b.getSaldo().add(premio));
-                    b.setFechaActualizacion(LocalDateTime.now());
-                    em.merge(b);
-                    em.flush(); // Fuerza la actualizacion del saldo en la BD inmediatamente
+                    
+                    // Actualizacion nativa directa a la base de datos evadiendo el cache de Hibernate
+                    em.createNativeQuery("UPDATE billeteras SET saldo = saldo + ?, fecha_actualizacion = CURRENT_TIMESTAMP() WHERE id = ?")
+                      .setParameter(1, premio)
+                      .setParameter(2, b.getId())
+                      .executeUpdate();
                     
                     Transaccion t = new Transaccion();
                     t.setBilleteraId(b.getId());
                     t.setTipo("PREMIO_PREDICCION");
                     t.setMonto(premio);
-                    t.setSaldoResultante(b.getSaldo());
+                    t.setSaldoResultante(b.getSaldo().add(premio));
                     t.setPrediccionId(p.getId());
                     t.setDescripcion("Premio por prediccion ganada partido #" + partidoId);
                     t.setFecha(LocalDateTime.now());
                     em.persist(t);
-                    em.flush(); // Sincroniza la transaccion insertada en la BD
                 }
             } else {
                 p.setEstado("PERDIDA");
             }
             em.merge(p);
-            em.flush(); // Sincroniza el estado de la prediccion final (GANADA o PERDIDA) en la BD
         }
     }
 }
