@@ -11,6 +11,7 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import java.time.LocalDateTime;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -25,26 +26,27 @@ public class PartidoResource {
     @PersistenceContext(unitName = "UTNGolCoinPU")
     private EntityManager em;
 
-    // Endpoint para sincronizar un partido asegurando la correspondencia del ID
+    // Endpoint para registrar o actualizar el partido desde .NET
     @POST
     @Transactional
     public Response sincronizarPartido(PartidoSyncDto dto) {
         try {
             if (dto == null || dto.getId() == null) {
                 return Response.status(Response.Status.BAD_REQUEST)
-                        .entity(new MensajeResponseDto("Datos de partido invalidos o ID faltante", false))
+                        .entity(new MensajeResponseDto("Datos de partido invalidos", false))
                         .build();
             }
 
-            // Realiza un UPSERT utilizando la sintaxis de MariaDB ON DUPLICATE KEY UPDATE
-            String sql = "INSERT INTO partidos (id, seleccion_local_id, seleccion_visitante_id, nombre_local, nombre_visitante, fase_codigo, fase_nombre, estado, fecha_hora_utc) " +
-                         "VALUES (?, ?, ?, 'Local', 'Visitante', ?, 'Fase Regular', ?, ?) " +
+            // Insercion o actualizacion en MariaDB respetando el ID de .NET
+            String sql = "INSERT INTO partidos (id, seleccion_local_id, seleccion_visitante_id, nombre_local, nombre_visitante, fase_codigo, fase_nombre, estado, fecha_hora_utc, fecha_sync) " +
+                         "VALUES (?, ?, ?, 'Local', 'Visitante', ?, 'Fase Regular', ?, ?, ?) " +
                          "ON DUPLICATE KEY UPDATE " +
                          "seleccion_local_id = VALUES(seleccion_local_id), " +
                          "seleccion_visitante_id = VALUES(seleccion_visitante_id), " +
                          "fase_codigo = VALUES(fase_codigo), " +
                          "estado = VALUES(estado), " +
-                         "fecha_hora_utc = VALUES(fecha_hora_utc)";
+                         "fecha_hora_utc = VALUES(fecha_hora_utc), " +
+                         "fecha_sync = VALUES(fecha_sync)";
 
             em.createNativeQuery(sql)
               .setParameter(1, dto.getId())
@@ -53,16 +55,17 @@ public class PartidoResource {
               .setParameter(4, dto.getFaseCodigo() != null ? dto.getFaseCodigo() : "N/A")
               .setParameter(5, dto.getEstado() != null ? dto.getEstado() : "PROGRAMADO")
               .setParameter(6, dto.getFechaPartido() != null ? dto.getFechaPartido() : "2026-01-01 00:00:00")
+              .setParameter(7, LocalDateTime.now())
               .executeUpdate();
 
-            return Response.status(Response.Status.CREATED)
+            return Response.ok()
                            .entity(new MensajeResponseDto("Partido sincronizado exitosamente", true))
                            .build();
 
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Error al sincronizar partido", e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                           .entity(new MensajeResponseDto("Error interno al sincronizar el partido", false))
+                           .entity(new MensajeResponseDto("Error interno al sincronizar", false))
                            .build();
         }
     }
