@@ -1,10 +1,8 @@
 package ec.edu.utn.golmundial.dto;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.io.Serializable;
 
 // DTO para el registro de nuevos usuarios
-@JsonIgnoreProperties(ignoreUnknown = true)
 public class UsuarioRegistroDto implements Serializable {
 
     private Integer id;
