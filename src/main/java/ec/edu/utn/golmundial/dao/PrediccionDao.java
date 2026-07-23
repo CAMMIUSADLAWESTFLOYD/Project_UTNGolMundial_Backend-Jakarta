@@ -63,7 +63,8 @@ public class PrediccionDao {
             if (p.getTipoResultado().equals(resultadoFinal)) {
                 p.setEstado("GANADA");
                 
-                BigDecimal premio = p.getMonto().multiply(p.getCuotaAplicada());
+                // El premio a sumar es estrictamente monto * 2
+                BigDecimal premio = p.getMonto().multiply(new BigDecimal("2"));
                 
                 TypedQuery<Billetera> bQuery = em.createQuery("SELECT b FROM Billetera b WHERE b.usuarioId = :usuarioId", Billetera.class);
                 bQuery.setParameter("usuarioId", p.getUsuarioId());
