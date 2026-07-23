@@ -16,7 +16,6 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import java.math.BigDecimal;
 import java.util.List;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 // Recurso REST para gestionar las predicciones de los partidos
@@ -71,9 +70,9 @@ public class PrediccionResource {
 
             return Response.ok(new MensajeResponseDto("Prediccion registrada con exito", true)).build();
         } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "Error al registrar prediccion", e);
+            e.printStackTrace();
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                    .entity(new MensajeResponseDto("Error interno al registrar prediccion", false))
+                    .entity(new MensajeResponseDto("Error interno: " + e.getMessage(), false))
                     .build();
         }
     }
@@ -102,9 +101,9 @@ public class PrediccionResource {
 
             return Response.ok(new MensajeResponseDto("Liquidacion procesada correctamente", true)).build();
         } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "Error al liquidar predicciones", e);
+            e.printStackTrace();
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                    .entity(new MensajeResponseDto("Error interno al liquidar predicciones", false))
+                    .entity(new MensajeResponseDto("Error interno: " + e.getMessage(), false))
                     .build();
         }
     }
@@ -117,9 +116,9 @@ public class PrediccionResource {
             List<Prediccion> lista = prediccionDao.listarPorUsuario(usuarioId);
             return Response.ok(lista).build();
         } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "Error al listar predicciones de usuario", e);
+            e.printStackTrace();
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                    .entity(new MensajeResponseDto("Error interno al obtener predicciones", false))
+                    .entity(new MensajeResponseDto("Error interno: " + e.getMessage(), false))
                     .build();
         }
     }
