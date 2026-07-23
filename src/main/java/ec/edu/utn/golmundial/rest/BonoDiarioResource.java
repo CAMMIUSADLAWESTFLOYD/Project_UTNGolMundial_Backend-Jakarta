@@ -14,6 +14,8 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
@@ -24,6 +26,8 @@ import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 @Consumes(MediaType.APPLICATION_JSON)
 @Tag(name = "Bonos Diarios", description = "Endpoints para otorgamiento y consulta de bonos diarios")
 public class BonoDiarioResource {
+
+    private static final Logger LOGGER = Logger.getLogger(BonoDiarioResource.class.getName());
 
     @Inject
     private BonoDiarioDao bonoDiarioDao;
@@ -46,8 +50,9 @@ public class BonoDiarioResource {
 
             return Response.ok(new MensajeResponseDto("Bono diario otorgado exitosamente", true)).build();
         } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Error al otorgar bono diario", e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                    .entity(new MensajeResponseDto("Error al otorgar bono diario: " + e.getMessage(), false))
+                    .entity(new MensajeResponseDto("Error interno al otorgar bono diario", false))
                     .build();
         }
     }
@@ -57,7 +62,14 @@ public class BonoDiarioResource {
     @Path("/usuario/{usuarioId}")
     @Operation(summary = "Listar bonos diarios de usuario", description = "Consulta el historial de bonos diarios recibidos por el usuario")
     public Response listarPorUsuario(@PathParam("usuarioId") Long usuarioId) {
-        List<BonoDiario> lista = bonoDiarioDao.listarPorUsuario(usuarioId);
-        return Response.ok(lista).build();
+        try {
+            List<BonoDiario> lista = bonoDiarioDao.listarPorUsuario(usuarioId);
+            return Response.ok(lista).build();
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Error al listar bonos diarios", e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity(new MensajeResponseDto("Error interno al listar bonos", false))
+                    .build();
+        }
     }
 }
