@@ -16,6 +16,8 @@ public class PartidoSyncDto implements Serializable {
     private Integer sedeId;
     private Integer localId;
     private Integer visitanteId;
+    private String nombreLocal;
+    private String nombreVisitante;
 
     public PartidoSyncDto() {
     }
@@ -106,5 +108,21 @@ public class PartidoSyncDto implements Serializable {
 
     public void setVisitanteId(Integer visitanteId) {
         this.visitanteId = visitanteId;
+    }
+
+    public String getNombreLocal() {
+        return nombreLocal;
+    }
+
+    public void setNombreLocal(String nombreLocal) {
+        this.nombreLocal = nombreLocal;
+    }
+
+    public String getNombreVisitante() {
+        return nombreVisitante;
+    }
+
+    public void setNombreVisitante(String nombreVisitante) {
+        this.nombreVisitante = nombreVisitante;
     }
 }

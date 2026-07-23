@@ -37,12 +37,14 @@ public class PartidoResource {
                         .build();
             }
 
-            // Insercion o actualizacion en MariaDB respetando el ID de .NET
+            // Insercion o actualizacion en MariaDB respetando el ID y nombres de .NET
             String sql = "INSERT INTO partidos (id, seleccion_local_id, seleccion_visitante_id, nombre_local, nombre_visitante, fase_codigo, fase_nombre, estado, fecha_hora_utc, fecha_sync) " +
-                         "VALUES (?, ?, ?, 'Local', 'Visitante', ?, 'Fase Regular', ?, ?, ?) " +
+                         "VALUES (?, ?, ?, ?, ?, ?, 'Fase Regular', ?, ?, ?) " +
                          "ON DUPLICATE KEY UPDATE " +
                          "seleccion_local_id = VALUES(seleccion_local_id), " +
                          "seleccion_visitante_id = VALUES(seleccion_visitante_id), " +
+                         "nombre_local = VALUES(nombre_local), " +
+                         "nombre_visitante = VALUES(nombre_visitante), " +
                          "fase_codigo = VALUES(fase_codigo), " +
                          "estado = VALUES(estado), " +
                          "fecha_hora_utc = VALUES(fecha_hora_utc), " +
@@ -52,10 +54,12 @@ public class PartidoResource {
               .setParameter(1, dto.getId())
               .setParameter(2, dto.getLocalId() != null ? dto.getLocalId() : 0)
               .setParameter(3, dto.getVisitanteId() != null ? dto.getVisitanteId() : 0)
-              .setParameter(4, dto.getFaseCodigo() != null ? dto.getFaseCodigo() : "N/A")
-              .setParameter(5, dto.getEstado() != null ? dto.getEstado() : "PROGRAMADO")
-              .setParameter(6, dto.getFechaPartido() != null ? dto.getFechaPartido() : "2026-01-01 00:00:00")
-              .setParameter(7, LocalDateTime.now())
+              .setParameter(4, dto.getNombreLocal() != null ? dto.getNombreLocal() : "Local")
+              .setParameter(5, dto.getNombreVisitante() != null ? dto.getNombreVisitante() : "Visitante")
+              .setParameter(6, dto.getFaseCodigo() != null ? dto.getFaseCodigo() : "N/A")
+              .setParameter(7, dto.getEstado() != null ? dto.getEstado() : "PROGRAMADO")
+              .setParameter(8, dto.getFechaPartido() != null ? dto.getFechaPartido() : "2026-01-01 00:00:00")
+              .setParameter(9, LocalDateTime.now())
               .executeUpdate();
 
             return Response.ok()
