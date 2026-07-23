@@ -18,15 +18,11 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.eclipse.microprofile.openapi.annotations.Operation;
-import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
-import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 
 // Recurso REST para gestionar las predicciones de los partidos
 @Path("/predicciones")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
-@Tag(name = "Predicciones", description = "Endpoints para registrar, liquidar y consultar predicciones")
 public class PrediccionResource {
 
     private static final Logger LOGGER = Logger.getLogger(PrediccionResource.class.getName());
@@ -37,9 +33,6 @@ public class PrediccionResource {
     // Endpoint para registrar una nueva prediccion consumiendo el procedimiento almacenado
     @POST
     @Path("/registrar")
-    @Operation(summary = "Registrar prediccion", description = "Registra una nueva prediccion llamando a sp_registrar_prediccion")
-    @APIResponse(responseCode = "200", description = "Prediccion registrada exitosamente")
-    @APIResponse(responseCode = "400", description = "Datos de entrada invalidos")
     public Response registrarPrediccion(PrediccionRequestDto dto) {
         try {
             if (dto == null || dto.getUsuarioId() == null || dto.getPartidoId() == null || dto.getMonto() == null || dto.getTipoResultado() == null) {
@@ -55,9 +48,17 @@ public class PrediccionResource {
             }
 
             String tipo = dto.getTipoResultado().toUpperCase();
+            if (tipo.equals("LOCAL")) {
+                tipo = "1";
+            } else if (tipo.equals("EMPATE")) {
+                tipo = "X";
+            } else if (tipo.equals("VISITANTE")) {
+                tipo = "2";
+            }
+
             if (!tipo.equals("1") && !tipo.equals("X") && !tipo.equals("2")) {
                 return Response.status(Response.Status.BAD_REQUEST)
-                        .entity(new MensajeResponseDto("El tipo de resultado debe ser '1', 'X' o '2'", false))
+                        .entity(new MensajeResponseDto("El tipo de resultado debe ser Local, Empate o Visitante", false))
                         .build();
             }
 
@@ -80,9 +81,6 @@ public class PrediccionResource {
     // Endpoint para liquidar los premios de un partido finalizado
     @POST
     @Path("/liquidar")
-    @Operation(summary = "Liquidar predicciones de partido", description = "Liquida predicciones llamando a sp_liquidar_predicciones_partido")
-    @APIResponse(responseCode = "200", description = "Liquidacion completada exitosamente")
-    @APIResponse(responseCode = "400", description = "Datos incompletos")
     public Response liquidarPredicciones(LiquidacionRequestDto dto) {
         try {
             if (dto == null || dto.getPartidoId() == null || dto.getResultadoFinal() == null) {
@@ -114,7 +112,6 @@ public class PrediccionResource {
     // Endpoint para consultar las predicciones de un usuario especifico
     @GET
     @Path("/usuario/{usuarioId}")
-    @Operation(summary = "Listar predicciones de usuario", description = "Obtiene la lista de predicciones realizadas por un usuario")
     public Response listarPorUsuario(@PathParam("usuarioId") Long usuarioId) {
         try {
             List<Prediccion> lista = prediccionDao.listarPorUsuario(usuarioId);
