@@ -73,21 +73,19 @@ public class PrediccionDao {
                 if (!billeteras.isEmpty()) {
                     Billetera b = billeteras.get(0);
                     
-                    // Actualizacion nativa directa a la base de datos evadiendo el cache de Hibernate
-                    em.createNativeQuery("UPDATE billeteras SET saldo = saldo + ?, fecha_actualizacion = CURRENT_TIMESTAMP() WHERE id = ?")
-                      .setParameter(1, premio)
-                      .setParameter(2, b.getId())
-                      .executeUpdate();
-                    
+                    // Solo insertamos la transaccion. La base de datos tiene un trigger 
+                    // (trg_transacciones_before_insert / after_insert) que actualiza 
+                    // automaticamente el saldo de la billetera al insertar aqui.
                     Transaccion t = new Transaccion();
                     t.setBilleteraId(b.getId());
                     t.setTipo("PREMIO_PREDICCION");
                     t.setMonto(premio);
-                    t.setSaldoResultante(b.getSaldo().add(premio));
+                    t.setSaldoResultante(BigDecimal.ZERO); // El trigger lo recalcula
                     t.setPrediccionId(p.getId());
                     t.setDescripcion("Premio por prediccion ganada partido #" + partidoId);
                     t.setFecha(LocalDateTime.now());
                     em.persist(t);
+                    em.flush(); // Obliga al INSERT y al TRIGGER a ejecutarse fisicamente ya mismo
                 }
             } else {
                 p.setEstado("PERDIDA");
