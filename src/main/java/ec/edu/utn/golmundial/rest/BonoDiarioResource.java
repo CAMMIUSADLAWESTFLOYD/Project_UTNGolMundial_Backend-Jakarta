@@ -14,6 +14,7 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import java.util.List;
+import java.time.LocalDate;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.eclipse.microprofile.openapi.annotations.Operation;
@@ -46,7 +47,8 @@ public class BonoDiarioResource {
                         .build();
             }
 
-            bonoDiarioDao.otorgarBonoDiario(dto.getUsuarioId());
+            LocalDate fecha = (dto.getFechaSimulada() != null) ? dto.getFechaSimulada() : LocalDate.now();
+            bonoDiarioDao.otorgarBonoDiario(dto.getUsuarioId(), fecha);
 
             return Response.ok(new MensajeResponseDto("Bono diario otorgado exitosamente", true)).build();
         } catch (Exception e) {

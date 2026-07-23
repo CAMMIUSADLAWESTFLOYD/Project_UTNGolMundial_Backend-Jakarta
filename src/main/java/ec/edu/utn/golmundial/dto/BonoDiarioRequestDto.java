@@ -6,6 +6,7 @@ import java.io.Serializable;
 public class BonoDiarioRequestDto implements Serializable {
 
     private Long usuarioId;
+    private java.time.LocalDate fechaSimulada;
 
     public BonoDiarioRequestDto() {
     }
@@ -16,5 +17,13 @@ public class BonoDiarioRequestDto implements Serializable {
 
     public void setUsuarioId(Long usuarioId) {
         this.usuarioId = usuarioId;
+    }
+
+    public java.time.LocalDate getFechaSimulada() {
+        return fechaSimulada;
+    }
+
+    public void setFechaSimulada(java.time.LocalDate fechaSimulada) {
+        this.fechaSimulada = fechaSimulada;
     }
 }

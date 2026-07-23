@@ -8,6 +8,7 @@ import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.StoredProcedureQuery;
 import jakarta.persistence.TypedQuery;
 import java.util.List;
+import java.time.LocalDate;
 
 // DAO sin estado para gestionar el bono diario
 @Stateless
@@ -24,10 +25,13 @@ public class BonoDiarioDao {
     }
 
     // Llama al procedimiento almacenado sp_otorgar_bono_diario
-    public void otorgarBonoDiario(Long usuarioId) {
+    public void otorgarBonoDiario(Long usuarioId, LocalDate fecha) {
         StoredProcedureQuery sp = em.createStoredProcedureQuery("sp_otorgar_bono_diario");
         sp.registerStoredProcedureParameter("p_usuario_id", Long.class, ParameterMode.IN);
+        sp.registerStoredProcedureParameter("p_fecha", java.sql.Date.class, ParameterMode.IN);
+        
         sp.setParameter("p_usuario_id", usuarioId);
+        sp.setParameter("p_fecha", java.sql.Date.valueOf(fecha));
         sp.execute();
     }
 }
