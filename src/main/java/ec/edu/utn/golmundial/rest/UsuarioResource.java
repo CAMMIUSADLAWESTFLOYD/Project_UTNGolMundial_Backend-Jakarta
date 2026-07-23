@@ -71,9 +71,9 @@ public class UsuarioResource {
             
             return Response.ok(new MensajeResponseDto("Usuario registrado exitosamente", true)).build();
         } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "Error al registrar usuario", e);
+            e.printStackTrace();
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                           .entity(new MensajeResponseDto("Error interno al registrar usuario", false))
+                           .entity(new MensajeResponseDto("Error interno en Jakarta: " + e.getMessage(), false))
                            .build();
         }
     }
