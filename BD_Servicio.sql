@@ -496,22 +496,23 @@ BEGIN
   DECLARE v_saldo        DECIMAL(12,2);
   DECLARE v_ya_otorgado  INT DEFAULT 0;
   DECLARE v_transaccion  BIGINT UNSIGNED;
+  DECLARE v_fecha        DATE;
+
+  SET v_fecha = IFNULL(p_fecha, CURDATE());
 
   SELECT id, saldo INTO v_billetera_id, v_saldo
   FROM billeteras WHERE usuario_id = p_usuario_id;
 
   SELECT COUNT(*) INTO v_ya_otorgado
-  FROM bonos_diarios WHERE usuario_id = p_usuario_id AND fecha = p_fecha;
+  FROM bonos_diarios WHERE usuario_id = p_usuario_id AND fecha = v_fecha;
 
   IF v_saldo <= 0 AND v_ya_otorgado = 0 THEN
-    UPDATE billeteras SET saldo = saldo + 1.00 WHERE id = v_billetera_id;
-
     INSERT INTO transacciones (billetera_id, tipo, monto, saldo_resultante, descripcion)
-    VALUES (v_billetera_id, 'BONO_DIARIO', 1.00, v_saldo + 1.00, 'Bono diario anti-bancarrota');
+    VALUES (v_billetera_id, 'BONO_DIARIO', 1.00, 0.00, 'Bono diario anti-bancarrota');
     SET v_transaccion = LAST_INSERT_ID();
 
     INSERT INTO bonos_diarios (usuario_id, fecha, monto, transaccion_id)
-    VALUES (p_usuario_id, p_fecha, 1.00, v_transaccion);
+    VALUES (p_usuario_id, v_fecha, 1.00, v_transaccion);
   END IF;
 END
 ;;
@@ -723,4 +724,4 @@ DELIMITER ;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-07-23  0:35:34
+-- Dump completed on 2026-07-23  7:43:21
