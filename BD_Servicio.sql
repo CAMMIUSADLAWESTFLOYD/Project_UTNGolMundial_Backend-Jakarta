@@ -159,7 +159,7 @@ CREATE TABLE `predicciones` (
   `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
   `usuario_id` int(10) unsigned NOT NULL,
   `partido_id` int(10) unsigned NOT NULL,
-  `tipo_resultado` char(1) NOT NULL,
+  `tipo_resultado` varchar(15) NOT NULL,
   `monto` decimal(12,2) NOT NULL,
   `cuota_aplicada` decimal(5,2) NOT NULL,
   `estado` varchar(10) NOT NULL DEFAULT 'PENDIENTE',
@@ -171,7 +171,6 @@ CREATE TABLE `predicciones` (
   KEY `idx_prediccion_estado` (`estado`),
   CONSTRAINT `fk_prediccion_partido` FOREIGN KEY (`partido_id`) REFERENCES `partidos` (`id`),
   CONSTRAINT `fk_prediccion_usuario` FOREIGN KEY (`usuario_id`) REFERENCES `usuarios` (`id`),
-  CONSTRAINT `chk_tipo_resultado` CHECK (`tipo_resultado` in ('1','X','2')),
   CONSTRAINT `chk_estado_prediccion` CHECK (`estado` in ('PENDIENTE','GANADA','PERDIDA')),
   CONSTRAINT `chk_monto_positivo` CHECK (`monto` > 0)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -522,19 +521,19 @@ DELIMITER ;
 /*!50003 SET character_set_results = @saved_cs_results */ ;
 /*!50003 SET collation_connection  = @saved_col_connection */ ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
-/*!50003 SET sql_mode              = 'IGNORE_SPACE,STRICT_TRANS_TABLES,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION' */ ;
+/*!50003 SET sql_mode              = 'STRICT_TRANS_TABLES,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION' */ ;
 /*!50003 DROP PROCEDURE IF EXISTS `sp_registrar_prediccion` */;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
 /*!50003 SET @saved_col_connection = @@collation_connection */ ;
-/*!50003 SET character_set_client  = utf8mb4 */ ;
-/*!50003 SET character_set_results = utf8mb4 */ ;
-/*!50003 SET collation_connection  = utf8mb4_uca1400_ai_ci */ ;
+/*!50003 SET character_set_client  = utf8mb3 */ ;
+/*!50003 SET character_set_results = utf8mb3 */ ;
+/*!50003 SET collation_connection  = utf8mb3_general_ci */ ;
 DELIMITER ;;
 CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_registrar_prediccion`(
   IN p_usuario_id     INT UNSIGNED,
   IN p_partido_id     INT UNSIGNED,
-  IN p_tipo_resultado CHAR(1),
+  IN p_tipo_resultado VARCHAR(15),
   IN p_monto          DECIMAL(12,2)
 )
 BEGIN
@@ -547,8 +546,11 @@ BEGIN
 
   SELECT fecha_hora_utc,
     CASE p_tipo_resultado
+      WHEN 'LOCAL' THEN cuota_local
       WHEN '1' THEN cuota_local
+      WHEN 'EMPATE' THEN cuota_empate
       WHEN 'X' THEN cuota_empate
+      WHEN 'VISITANTE' THEN cuota_visitante
       WHEN '2' THEN cuota_visitante
     END
   INTO v_fecha_utc, v_cuota
@@ -721,4 +723,4 @@ DELIMITER ;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-07-22 23:57:14
+-- Dump completed on 2026-07-23  0:35:34
