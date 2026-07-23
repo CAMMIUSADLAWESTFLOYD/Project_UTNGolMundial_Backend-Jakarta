@@ -34,6 +34,8 @@ public class PrediccionDao {
 
     // Llama al procedimiento almacenado sp_registrar_prediccion
     public void registrarPrediccion(Long usuarioId, Long partidoId, String tipoResultado, BigDecimal monto) {
+        em.flush(); // Sincroniza estado previo antes de llamar al stored procedure
+        
         StoredProcedureQuery sp = em.createStoredProcedureQuery("sp_registrar_prediccion");
         sp.registerStoredProcedureParameter("p_usuario_id", Long.class, ParameterMode.IN);
         sp.registerStoredProcedureParameter("p_partido_id", Long.class, ParameterMode.IN);
@@ -70,6 +72,7 @@ public class PrediccionDao {
                     b.setSaldo(b.getSaldo().add(premio));
                     b.setFechaActualizacion(LocalDateTime.now());
                     em.merge(b);
+                    em.flush(); // Fuerza la actualizacion del saldo en la BD inmediatamente
                     
                     Transaccion t = new Transaccion();
                     t.setBilleteraId(b.getId());
@@ -80,11 +83,13 @@ public class PrediccionDao {
                     t.setDescripcion("Premio por prediccion ganada partido #" + partidoId);
                     t.setFecha(LocalDateTime.now());
                     em.persist(t);
+                    em.flush(); // Sincroniza la transaccion insertada en la BD
                 }
             } else {
                 p.setEstado("PERDIDA");
             }
             em.merge(p);
+            em.flush(); // Sincroniza el estado de la prediccion final (GANADA o PERDIDA) en la BD
         }
     }
 }
