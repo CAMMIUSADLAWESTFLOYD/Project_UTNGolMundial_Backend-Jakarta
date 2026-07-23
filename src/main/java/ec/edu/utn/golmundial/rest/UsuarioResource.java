@@ -73,7 +73,7 @@ public class UsuarioResource {
         } catch (Exception e) {
             e.printStackTrace();
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                           .entity(new MensajeResponseDto("Error interno en Jakarta: " + e.getMessage(), false))
+                           .entity(new MensajeResponseDto("Error interno al crear usuario: " + e.getMessage(), false))
                            .build();
         }
     }
